@@ -11,7 +11,7 @@ Experimental agent skills from [Przeprogramowani](https://przeprogramowani.pl).
 | [`10x-labs-expert-team`](skills/10x-labs-expert-team/SKILL.md) | Assembles a small cross-field team, including red-team critics, and has each role do the real work of its job on the task instead of acting out a persona. |
 | [`10x-labs-push-further`](skills/10x-labs-push-further/SKILL.md) | Sets a hard, measurable target (often 10× past baseline) with guardrails and a complexity budget, and keeps iterating when progress stalls instead of stopping at "good enough". |
 
-The skills are based on Felix Rieseberg's "How to be more ambitious".
+All four skills are based on Felix Rieseberg's article [How to be more ambitious: a tutorial for humans with models](https://felixrieseberg.com/how-to-be-more-ambitious-a-tutorial-for-humans-with-models/).
 
 ## Install
 
