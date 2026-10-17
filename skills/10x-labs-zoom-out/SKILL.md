@@ -1,5 +1,5 @@
 ---
-name: 10x-lab-zoom-out
+name: 10x-labs-zoom-out
 description: >
   Turn a small, one-off task into the bigger outcome behind it, then list
   what the agent needs (data, access, environments) to own that outcome

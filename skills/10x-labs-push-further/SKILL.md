@@ -1,5 +1,5 @@
 ---
-name: 10x-lab-push-further
+name: 10x-labs-push-further
 description: >
   Set a very hard, specific, measurable target for the work and keep going
   when progress stalls, instead of stopping at "good enough". Use at the

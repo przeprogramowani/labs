@@ -1,5 +1,5 @@
 ---
-name: 10x-lab-expert-prompt
+name: 10x-labs-expert-prompt
 description: >
   Rewrite a task prompt the way a top expert in the field would approach
   it: deeper, not bigger. Finds what the expert would do that was not

@@ -1,5 +1,5 @@
 ---
-name: 10x-lab-expert-team
+name: 10x-labs-expert-team
 description: >
   Build a small team of experts from different fields — including critics
   who try to break the result — and have each one do the real work of their
