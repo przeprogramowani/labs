@@ -3,9 +3,9 @@ name: 10x-labs-memory-atlas
 description: >
   Find out how the coding agent you are running in stores memory (memory
   files such as MEMORY.md, saved notes), then scan every
-  project where that agent has sessions and write one atlas of all memory,
-  grouped by project: a Markdown file plus a self-contained HTML page to
-  preview in the browser. Agent-agnostic: the agent describes its own memory
+  project where that agent has sessions and write one atlas of all memory
+  that leads with a ranked clean-up plan and paste-ready prompts: a Markdown
+  file plus a self-contained HTML page to preview in the browser. Agent-agnostic: the agent describes its own memory
   conventions and proves them on disk; the skill names no paths. Use when the user asks "what does my agent remember",
   "where is my agent's memory", "summarize memory across projects", "audit
   memory", "memory map", or wants to clean up stale or conflicting memories.
@@ -25,7 +25,7 @@ allowed-tools:
 
 Agents save small facts while they work: a user preference, a project constraint, a correction ("don't mock the DB in these tests"). Each fact lands in a file somewhere — per project, per user, sometimes in a folder the user has never opened. After a few months nobody knows what the agent believes, which notes are stale, or which projects disagree with each other.
 
-This skill makes that visible. It runs in two parts: first it learns how *this* agent stores memory, then it reads all of it and writes an atlas grouped by project. It never changes a memory file.
+This skill makes that visible and tells the user what to do about it. First it learns how *this* agent stores memory, then it reads all of it, turns the findings into a ranked plan, and writes an atlas that leads with that plan. It never changes a memory file.
 
 **Scope: only what the agent saved itself.** Hand-written instruction files (`CLAUDE.md`, `AGENTS.md`, rules and the like) belong to the user, who can already see them. Do not read, inventory, summarize or flag them.
 
@@ -67,43 +67,68 @@ For each project, and once for user-level (global) memory:
 
 Do not edit, merge or delete anything. Put suggested fixes in the report and let the user act on them.
 
+Flags are working notes, not the result. Before writing anything, turn them into a plan (Step 4).
+
+## Step 4 — Turn the findings into a plan
+
+The reader wants to know what to do, not to audit a scan. A correct report that lists every flag at equal weight, project by project, leaves them to work out the plan themselves.
+
+- **Merge flags into fixes.** One fix is one thing the user would do, usually covering several memories ("move these 4 memories to the repo they describe"). Aim for about a dozen fixes at most, whatever the number of flags.
+- **Rank them in three tiers:**
+  - **Do now** — wrong behaviour or lost knowledge today: instructions misleading live sessions, memories cut off from live code, sensitive procedures nobody has decided on.
+  - **Do soon** — knowledge not reaching the sessions that need it, finished work still presented as current.
+  - **When convenient** — small accuracy fixes such as drifted details and broken links.
+- **Write each fix so it can be acted on:** a title that names the action, one or two sentences on why it matters in plain words, the memories it covers, who acts (the agent, or a decision only the user can make), and a prompt to paste into the agent. The prompt names exact paths, says what to do, and shows the change or asks before deleting anything. Reword flags into consequences: not "orphan", but "the agent does not know this note exists".
+- **Group memories by topic, not by folder.** Read them as a whole and name 5–8 topics that fit this user. Give each memory a short human title. Show the file name and path only as secondary detail.
+- **Account for everything.** Every memory appears once under a topic, and every flagged memory belongs to a fix or is deliberately marked as needing none. Check this with a script rather than by eye, and count the memories that need nothing.
+
 ## Output
 
-Write two files into `memory-atlas/` in the current directory (or a folder the user names), and print both paths at the end.
+Write two files into `memory-atlas/` in the current directory (or a folder the user names), and print both paths at the end. Lead with the answer and put reference material last.
 
-**`memory-atlas.md`** with exactly these sections:
+**`memory-atlas.md`** with these sections, in this order:
 
 ```markdown
 # Memory atlas — <agent name>, <date>
 
-## How this agent stores memory
-<the memory model from Step 1: kinds, locations, index files, what loads at session start, what could not be confirmed>
+**<N> memories. <X> need nothing. The other <Y> come down to <Z> fixes, and <W> are worth doing now.**
 
-## Overview
-| Project | Path | Sessions | Last session | Memories | Flags |
-|---|---|---|---|---|---|
+## The plan
+### Do now
+**1. <fix title>** (<who acts>)
+<why it matters>
+Affects: <memory titles and their projects>
+<paste-ready prompt in a code block>
+### Do soon
+### When convenient
 
-## Global (user-level) memory
-| Memory | Type | Summary | Updated | Flags |
-|---|---|---|---|---|
+## What your agent knows
+### <topic>
+- **<short title>** → fix <n>: <one-line summary> (<project>)
 
-## <project name>
-Path: ... · Sessions: ... · Last session: ...
-| Memory | Type | Summary | Updated | Flags |
-|---|---|---|---|---|
-<repeat per project; projects with no memory get one line saying so>
+## How this memory works
+<what the user should know from Step 1, what loads at session start, habits that lose memory, what could not be confirmed>
 
-## Suggested clean-up
-- <flagged item → suggested action>
+## Limits of this scan
+<what was skipped, withheld or unconfirmed>
+
+## Projects
+| Project | Memories | Sessions | Last session |
+|---|---|---|---|
+<projects with memory; give a one-line count for projects without any instead of listing them>
 ```
 
 **`memory-atlas.html`** with the same content as one self-contained file that opens straight from disk:
 
+- **Verdict first.** The page opens with the verdict sentence as its headline and a simple breakdown of memories by tier, including those that need nothing.
+- **The plan comes next, visible without clicking.** Show one card per fix under its tier: a checkbox that remembers progress in `localStorage` (and still works if storage is blocked), the title, the why, who acts, and a **Copy prompt** button with a fallback for when the clipboard API is unavailable. The memories covered and the prompt text can sit behind a toggle.
+- **Then the knowledge map.** Show collapsible topics with a memory count and a count needing fixes, with a search box and an "only ones needing a fix" toggle. Each memory shows its title, summary, project and a link to its fix, with paths de-emphasised. Show notes on a memory only when it has a problem.
+- **Reference goes last, collapsed:** how memory works, the project table and the limits of the scan.
+- **Build real hierarchy.** Use a single readable column, with clear differences in size and weight between headline, sections and cards. Avoid a dashboard of equal-weight tables, a full table per project, or a row of badges on every line.
 - Inline CSS and JS only. No CDN, fonts or network calls (it holds private notes and should work offline).
-- A sidebar or top list of projects with memory counts; a search box that filters memories as you type; flag badges you can filter by.
-- One section per project, collapsible, with the memory table; the "how memory works" section at the top.
 - Readable in light and dark mode (`prefers-color-scheme`), usable at phone width.
-- Escape all memory text as HTML; never insert it as raw markup.
+- Insert memory text as text (`textContent`) or escape it as HTML; never insert it as raw markup. Escape `<` in any JSON embedded in the page.
+- **Look at it before finishing.** If you can render or screenshot the page, do so and fix what reads badly. Otherwise say it has not been checked in a browser.
 
 Do not upload or publish either file unless the user asks — they describe the user's projects and habits.
 
